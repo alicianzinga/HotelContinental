@@ -1,0 +1,37 @@
+services:
+  - type: web
+    name: agenda-hotel-backend
+    runtime: node
+    rootDir: backend
+    buildCommand: |
+      npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: 18
+      - key: NODE_ENV
+        value: production
+      - key: FRONTEND_URL
+        fromService:
+          name: agenda-hotel-frontend
+          type: static_site
+          property: url
+      # Configure também no painel do Render (ou aqui) as variáveis abaixo:
+      # - SUPABASE_URL
+      # - SUPABASE_SERVICE_ROLE_KEY
+      # - JWT_SECRET
+
+staticSites:
+  - name: agenda-hotel-frontend
+    rootDir: frontend
+    buildCommand: |
+      npm install
+      npm run build
+    publishPath: dist
+    envVars:
+      - key: VITE_API_BASE_URL
+        fromService:
+          name: agenda-hotel-backend
+          type: web
+          property: url
+

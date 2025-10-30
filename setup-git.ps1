@@ -19,3 +19,4 @@ Set-Location "C:\Users\24011693\Desktop\agenda hotel"
 
 Write-Host "Git configurado com sucesso!"
 Write-Host "Repositório inicializado em: $(Get-Location)"
+
