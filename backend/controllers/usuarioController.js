@@ -6,11 +6,13 @@ class UsuarioController {
   // Criar novo usuário
   static async create(req, res, next) {
     try {
+      console.log('📝 Tentativa de criar usuário:', { email: req.body.email, nome: req.body.nome });
       const { senha, ...userData } = req.body;
 
       // Verificar se email já existe
       const existingUser = await Usuario.findByEmail(userData.email);
       if (existingUser) {
+        console.log('❌ Email já existe:', userData.email);
         return res.status(409).json({
           success: false,
           message: 'Email já cadastrado',
@@ -22,6 +24,7 @@ class UsuarioController {
       if (userData.cpf) {
         const existingCpf = await Usuario.findByCpf(userData.cpf);
         if (existingCpf) {
+          console.log('❌ CPF já existe:', userData.cpf);
           return res.status(409).json({
             success: false,
             message: 'CPF já cadastrado',
@@ -31,13 +34,16 @@ class UsuarioController {
       }
 
       // Criptografar senha
+      console.log('🔐 Criptografando senha...');
       const hashedPassword = await bcrypt.hash(senha, 12);
 
       // Criar usuário
+      console.log('💾 Tentando criar usuário no banco...');
       const newUser = await Usuario.create({
         ...userData,
         senha: hashedPassword
       });
+      console.log('✅ Usuário criado com sucesso:', newUser.id);
 
       // Gerar token
       const token = generateToken(newUser.id);
@@ -51,6 +57,13 @@ class UsuarioController {
         }
       });
     } catch (error) {
+      console.error('❌ Erro ao criar usuário:', error);
+      console.error('Detalhes do erro:', {
+        message: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint
+      });
       next(error);
     }
   }

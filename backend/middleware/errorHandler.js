@@ -59,7 +59,11 @@ const errorHandler = (err, req, res, next) => {
     success: false,
     message: err.message || 'Erro interno do servidor',
     code: err.code || 'INTERNAL_ERROR',
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+    ...(process.env.NODE_ENV !== 'production' && { 
+      stack: err.stack,
+      details: err.details,
+      hint: err.hint
+    })
   });
 };
 
