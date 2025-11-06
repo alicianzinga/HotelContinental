@@ -22,10 +22,17 @@ const Register = () => {
   const onSubmit = async (data) => {
     try {
       setIsLoading(true);
+      console.log('📝 Dados do formulário:', data);
       await registerUser(data);
       navigate('/dashboard');
     } catch (error) {
-      console.error('Erro no cadastro:', error);
+      console.error('❌ Erro no cadastro:', error);
+      console.error('Detalhes do erro:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      });
+      // O toast já é mostrado pelo interceptor do axios
     } finally {
       setIsLoading(false);
     }

@@ -14,6 +14,12 @@ const api = axios.create({
 // Interceptor para adicionar token de autenticação
 api.interceptors.request.use(
   (config) => {
+    console.log('📤 Enviando requisição:', {
+      method: config.method,
+      url: config.url,
+      baseURL: config.baseURL,
+      data: config.data
+    });
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -21,6 +27,7 @@ api.interceptors.request.use(
     return config;
   },
   (error) => {
+    console.error('❌ Erro ao configurar requisição:', error);
     return Promise.reject(error);
   }
 );
@@ -28,10 +35,26 @@ api.interceptors.request.use(
 // Interceptor para tratamento de respostas
 api.interceptors.response.use(
   (response) => {
+    console.log('✅ Resposta da API:', response);
     return response.data;
   },
   (error) => {
-    const message = error.response?.data?.message || 'Erro interno do servidor';
+    console.error('❌ Erro na requisição:', {
+      message: error.message,
+      url: error.config?.url,
+      method: error.config?.method,
+      status: error.response?.status,
+      data: error.response?.data,
+      noResponse: !error.response
+    });
+    
+    const message = error.response?.data?.message || error.message || 'Erro interno do servidor';
+    
+    // Erro de rede (sem resposta do servidor)
+    if (!error.response) {
+      toast.error('Erro de conexão. Verifique sua internet ou se o servidor está online.');
+      return Promise.reject(error);
+    }
     
     // Tratamento específico para erros de autenticação
     if (error.response?.status === 401) {
