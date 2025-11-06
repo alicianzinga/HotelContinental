@@ -14,8 +14,29 @@ const PORT = process.env.PORT || 3000;
 app.use(helmet());
 
 // Configuração de CORS
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  'http://localhost:3000',
+  'http://localhost:3001',
+  'http://localhost:5173'
+].filter(Boolean); // Remove valores undefined/null
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: function (origin, callback) {
+    // Permite requisições sem origin (mobile apps, Postman, etc)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV !== 'production') {
+      callback(null, true);
+    } else {
+      // Em produção, aceita qualquer origem do Render (para facilitar)
+      if (origin.includes('.onrender.com')) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    }
+  },
   credentials: true
 }));
 
@@ -65,6 +86,25 @@ app.get('/health', (req, res) => {
     message: 'API funcionando corretamente',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development'
+  });
+});
+
+// Rota de debug (apenas em desenvolvimento)
+app.get('/debug', (req, res) => {
+  if (process.env.NODE_ENV === 'production') {
+    return res.status(403).json({ success: false, message: 'Debug desabilitado em produção' });
+  }
+  
+  res.json({
+    success: true,
+    env: {
+      NODE_ENV: process.env.NODE_ENV,
+      PORT: process.env.PORT,
+      FRONTEND_URL: process.env.FRONTEND_URL,
+      hasSupabaseUrl: !!process.env.SUPABASE_URL,
+      hasSupabaseKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+      hasJwtSecret: !!process.env.JWT_SECRET
+    }
   });
 });
 
