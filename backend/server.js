@@ -108,6 +108,49 @@ app.get('/debug', (req, res) => {
   });
 });
 
+// Rota de teste de conexão com Supabase
+app.get('/test-db', async (req, res) => {
+  try {
+    const supabase = require('./config/database');
+    
+    // Testar conexão fazendo uma query simples
+    const { data, error } = await supabase
+      .from('usuario')
+      .select('count')
+      .limit(1);
+    
+    if (error) {
+      return res.status(500).json({
+        success: false,
+        message: 'Erro ao conectar com o banco de dados',
+        error: error.message,
+        code: error.code,
+        details: error
+      });
+    }
+    
+    // Tentar contar usuários
+    const { count, error: countError } = await supabase
+      .from('usuario')
+      .select('*', { count: 'exact', head: true });
+    
+    res.json({
+      success: true,
+      message: 'Conexão com Supabase funcionando',
+      tableExists: true,
+      userCount: count || 0,
+      supabaseUrl: process.env.SUPABASE_URL ? 'Configurado' : 'Não configurado'
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Erro ao testar conexão',
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
+  }
+});
+
 // Rotas da API
 app.use('/api/usuarios', usuarioRoutes);
 
