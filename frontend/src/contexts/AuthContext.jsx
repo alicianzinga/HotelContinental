@@ -35,10 +35,17 @@ export const AuthProvider = ({ children }) => {
     try {
       setLoading(true);
       const response = await authService.login(email, senha);
-      setUser(response.usuario);
-      setIsAuth(true);
-      return response;
+      console.log('📦 Resposta no AuthContext:', response);
+      // response já é o data retornado pelo authService (que contém usuario e token)
+      if (response && response.usuario) {
+        setUser(response.usuario);
+        setIsAuth(true);
+        return response;
+      } else {
+        throw new Error('Resposta inválida: usuário não encontrado');
+      }
     } catch (error) {
+      console.error('❌ Erro no AuthContext.login:', error);
       throw error;
     } finally {
       setLoading(false);
@@ -50,10 +57,17 @@ export const AuthProvider = ({ children }) => {
     try {
       setLoading(true);
       const response = await authService.register(userData);
-      setUser(response.usuario);
-      setIsAuth(true);
-      return response;
+      console.log('📦 Resposta no AuthContext:', response);
+      // response já é o data retornado pelo authService (que contém usuario e token)
+      if (response && response.usuario) {
+        setUser(response.usuario);
+        setIsAuth(true);
+        return response;
+      } else {
+        throw new Error('Resposta inválida: usuário não encontrado');
+      }
     } catch (error) {
+      console.error('❌ Erro no AuthContext.register:', error);
       throw error;
     } finally {
       setLoading(false);

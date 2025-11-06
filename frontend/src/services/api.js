@@ -35,7 +35,12 @@ api.interceptors.request.use(
 // Interceptor para tratamento de respostas
 api.interceptors.response.use(
   (response) => {
-    console.log('✅ Resposta da API:', response);
+    console.log('✅ Resposta completa da API:', {
+      status: response.status,
+      data: response.data,
+      headers: response.headers
+    });
+    // Retorna o data completo (que já contém success, message, data)
     return response.data;
   },
   (error) => {
@@ -83,14 +88,19 @@ export const authService = {
         email,
         senha,
       });
+      console.log('📦 Resposta do login:', response);
       
-      if (response.success) {
+      if (response.success && response.data) {
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('user', JSON.stringify(response.data.usuario));
         toast.success('Login realizado com sucesso!');
         return response.data;
+      } else {
+        console.error('❌ Resposta inválida:', response);
+        throw new Error('Resposta inválida do servidor');
       }
     } catch (error) {
+      console.error('❌ Erro no login:', error);
       throw error;
     }
   },
@@ -99,14 +109,19 @@ export const authService = {
   register: async (userData) => {
     try {
       const response = await api.post('/usuarios/register', userData);
+      console.log('📦 Resposta do registro:', response);
       
-      if (response.success) {
+      if (response.success && response.data) {
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('user', JSON.stringify(response.data.usuario));
         toast.success('Conta criada com sucesso!');
         return response.data;
+      } else {
+        console.error('❌ Resposta inválida:', response);
+        throw new Error('Resposta inválida do servidor');
       }
     } catch (error) {
+      console.error('❌ Erro no registro:', error);
       throw error;
     }
   },
