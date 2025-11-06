@@ -42,6 +42,22 @@ app.use((req, res, next) => {
   next();
 });
 
+// Rota raiz - informações da API
+app.get('/', (req, res) => {
+  res.json({
+    success: true,
+    message: 'API Agenda Hotel - Backend funcionando',
+    version: '1.0.0',
+    endpoints: {
+      health: '/health',
+      api: '/api',
+      usuarios: '/api/usuarios'
+    },
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
+
 // Rota de health check
 app.get('/health', (req, res) => {
   res.json({
